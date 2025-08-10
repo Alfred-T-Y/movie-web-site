@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react"
 import Search from "./components/Search"
+import Spinner from "./components/Spinner";
+import MovieCard from "./components/MovieCard";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
-const API_KEY = import.meta.env.TMDB_API_KEY;
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const API_OPTIONS = {
   method: 'GET',
@@ -15,18 +17,44 @@ const API_OPTIONS = {
 const App = () => {
   const [searchTerm, setsearchTerm] = useState('');
   const [errorMessage, seterrorMessage] = useState('');
+  const [movieList, setmovieList] = useState([]);
+  const [isLoading, setisLoading] = useState(false);
 
   const fetchMovies = async () => {
+
+    setisLoading(true);
+    seterrorMessage('');
+
     try {
 
+      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const response = await fetch(endpoint, API_OPTIONS);
+      
+
+      if(!response.ok){
+        throw new Error('Failed to fetch movies');
+      }
+
+      const data = await response.json();
+      
+      if(data.Response == 'False'){
+        seterrorMessage(data.Error || 'Failed to fetch movies');
+        setmovieList([]);
+        return;
+      }
+
+      setmovieList(data.results || []);
+ 
     } catch (error){
       console.error(`Error fetching movies: ${error}`);
       seterrorMessage('Error fetching movies. Please try again later');
+    } finally {
+      setisLoading(false);
     }
   }
 
   useEffect(()=>{
-
+    fetchMovies();
   }, []);
 
   return(
@@ -41,7 +69,20 @@ const App = () => {
         </header>
 
         <section className="all-movies">
+          <h2 className="mt-[40px]">All Movies</h2>
 
+          {isLoading ? (
+            <Spinner/>
+          ) : errorMessage ? (
+            <p className="text-red-500">{errorMessage}</p>
+          ) : (
+            <ul>
+              {movieList.map((movie) => (
+                <MovieCard key={movie.id} movie={movie}/>
+              ))}
+            </ul>
+          )
+          }
         </section>
 
       </div>
