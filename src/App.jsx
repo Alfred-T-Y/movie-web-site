@@ -29,7 +29,6 @@ const App = () => {
 
       const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
       const response = await fetch(endpoint, API_OPTIONS);
-      
 
       if(!response.ok){
         throw new Error('Failed to fetch movies');
@@ -73,15 +72,15 @@ const App = () => {
 
           {isLoading ? (
             <Spinner/>
-          ) : errorMessage ? (
-            <p className="text-red-500">{errorMessage}</p>
-          ) : (
-            <ul>
-              {movieList.map((movie) => (
-                <MovieCard key={movie.id} movie={movie}/>
-              ))}
-            </ul>
-          )
+            ) : errorMessage ? (
+              <p className="text-red-500">{errorMessage}</p>
+            ) : (
+              <ul>
+                {movieList.map((movie) => (
+                  <MovieCard key={movie.id} movie={movie}/>
+                ))}
+              </ul>
+            )
           }
         </section>
 
