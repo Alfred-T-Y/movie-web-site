@@ -19,8 +19,20 @@ export const updateSearchCount = async(searchTerm, movie) => {
             tableId : TABLE_ID,
             queries : [ Query.equal("searchTerm", searchTerm) ]
         })
+        const doc = result.rows[0] || null;
+        await database.upsertRow({
+            databaseId: DATABASE_ID,
+            tableId: TABLE_ID,
+            rowId: doc?.$id ?? ID.unique(), 
+            data: {
+             searchTerm : doc?.searchTerm ?? searchTerm,
+             count: doc?.count+1,
+             movie_id: doc?.movie_id ?? movie.id,
+             poster_url: doc?.poster_url ?? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            }
+        })
 
-        if(result.total < 1){
+        /*if(result.total < 1){
             await database.createRow({
                 databaseId: DATABASE_ID,
                 tableId: TABLE_ID,
@@ -42,7 +54,7 @@ export const updateSearchCount = async(searchTerm, movie) => {
                  count: doc.count + 1,
                 }
             )
-        }
+        }*/
     } catch(error) {
         console.error(error);
     }
